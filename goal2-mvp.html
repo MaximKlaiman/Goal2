@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goal2 — Study Coach</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c232c; --line:#2a3038;
+    --txt:#e6edf3; --mut:#8b949e; --acc:#3fb950; --acc2:#2ea043;
+    --blue:#58a6ff; --warn:#d29922; --red:#f85149; --purple:#bc8cff;
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--blue));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#06210f}
+  h1{font-size:22px;letter-spacing:-.3px}
+  .tag{color:var(--mut);font-size:13px;margin-bottom:24px;font-style:italic}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+  .card h2{font-size:15px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:14px;font-weight:600}
+  label{display:block;font-size:13px;color:var(--mut);margin-bottom:6px;margin-top:12px}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    padding:10px 12px;border-radius:9px;font-size:14px;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:130px}
+  .topic{display:grid;grid-template-columns:1fr 130px 90px 36px;gap:10px;align-items:end;margin-bottom:10px}
+  .topic label{margin-top:0}
+  .days{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .day{flex:1;min-width:54px;text-align:center;background:var(--panel2);border:1px solid var(--line);
+    border-radius:8px;padding:8px 4px;cursor:pointer;font-size:12px;user-select:none}
+  .day.on{background:rgba(63,185,80,.15);border-color:var(--acc)}
+  .day input{width:46px;margin-top:6px;text-align:center;padding:4px;font-size:13px}
+  button{background:var(--acc);color:#06210f;border:none;padding:12px 20px;border-radius:9px;
+    font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+  button:hover{background:var(--acc2)}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:500;padding:8px 14px;font-size:13px}
+  button.ghost:hover{border-color:var(--blue)}
+  .iconbtn{background:var(--panel2);border:1px solid var(--line);color:var(--red);border-radius:8px;
+    width:36px;height:38px;font-size:18px;padding:0;font-weight:400}
+  .iconbtn:hover{background:rgba(248,81,73,.12)}
+  .hidden{display:none}
+  /* plan */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat .n{font-size:24px;font-weight:800;color:var(--acc)}
+  .stat .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+  .week{margin-bottom:20px}
+  .wkhd{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);
+    margin:18px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sesh{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue);
+    border-radius:10px;padding:13px 15px;margin-bottom:9px;display:flex;gap:14px;align-items:flex-start}
+  .sesh .date{min-width:62px;text-align:center}
+  .sesh .date .dow{font-size:11px;color:var(--mut);text-transform:uppercase}
+  .sesh .date .dnum{font-size:20px;font-weight:700}
+  .sesh .body{flex:1}
+  .sesh .ttl{font-weight:600;font-size:14px}
+  .sesh .meta{font-size:12px;color:var(--mut);margin-top:3px}
+  .chip{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:20px;margin-right:5px;
+    margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .c-new{background:rgba(88,166,255,.15);color:var(--blue)}
+  .c-rev{background:rgba(188,140,255,.15);color:var(--purple)}
+  .c-test{background:rgba(63,185,80,.15);color:var(--acc)}
+  .c-exam{background:rgba(248,81,73,.18);color:var(--red)}
+  .empty{color:var(--mut);font-size:13px;font-style:italic;padding:8px 0}
+  .why{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px;
+    font-size:13px;color:var(--mut);margin-bottom:18px}
+  .why b{color:var(--txt)}
+  .rest{opacity:.5;font-size:12px;padding:4px 0 4px 76px;color:var(--mut)}
+  @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.topic{grid-template-columns:1fr 1fr;gap:8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">G2</div>
+    <div><h1>Goal2</h1></div>
+  </header>
+  <div class="tag">"You don't have to be very smart. You just have to do these things."</div>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setup">
+    <div class="card">
+      <h2>1 · The Goal</h2>
+      <label>What are you working toward?</label>
+      <input id="goal" placeholder="e.g. Ace BIO 201 final — target A">
+      <div class="row">
+        <div>
+          <label>Exam / deadline date</label>
+          <input id="examDate" type="date">
+        </div>
+        <div>
+          <label>Start from</label>
+          <input id="startDate" type="date">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 · The Material (your syllabus)</h2>
+      <div id="topics"></div>
+      <button class="ghost" onclick="addTopic()">+ Add topic</button>
+      <div style="font-size:12px;color:var(--mut);margin-top:10px">
+        Difficulty drives how much practice each topic earns. Est. hours is your first guess — the coach corrects for it.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 · Your Real Week (capacity)</h2>
+      <label>Tick the days you can study and set available hours each.</label>
+      <div class="days" id="days"></div>
+    </div>
+
+    <button onclick="generate()" style="width:100%;margin-top:4px">Build my prescription →</button>
+  </div>
+
+  <!-- ============ PLAN ============ -->
+  <div id="plan" class="hidden">
+    <button class="ghost" onclick="back()" style="margin-bottom:16px">← Edit inputs</button>
+    <div id="planBody"></div>
+  </div>
+</div>
+
+<script>
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const today = new Date();
+const iso = d => d.toISOString().slice(0,10);
+
+// ---------- setup defaults ----------
+function addTopic(name="",diff="Medium",hrs=3){
+  const div=document.createElement("div");
+  div.className="topic";
+  div.innerHTML=`
+    <div><label>Topic</label><input class="t-name" value="${name}" placeholder="Chapter / unit"></div>
+    <div><label>Difficulty</label><select class="t-diff">
+      <option ${diff=="Easy"?"selected":""}>Easy</option>
+      <option ${diff=="Medium"?"selected":""}>Medium</option>
+      <option ${diff=="Hard"?"selected":""}>Hard</option></select></div>
+    <div><label>Est. hrs</label><input class="t-hrs" type="number" min="0.5" step="0.5" value="${hrs}"></div>
+    <button class="iconbtn" onclick="this.parentNode.remove()">×</button>`;
+  document.getElementById("topics").appendChild(div);
+}
+function buildDays(){
+  const c=document.getElementById("days");
+  const defOn={1:1,2:1,3:1,4:1,0:1}; // mon-thu + sun default on
+  const defHrs={0:2,1:1.5,2:1.5,3:1.5,4:1.5,5:0,6:3};
+  for(let i=0;i<7;i++){
+    const d=document.createElement("div");
+    d.className="day"+(defOn[i]?" on":"");
+    d.dataset.dow=i;
+    d.innerHTML=`${DOW[i]}<br><input type="number" min="0" step="0.5" value="${defHrs[i]}" onclick="event.stopPropagation()">`;
+    d.onclick=()=>d.classList.toggle("on");
+    c.appendChild(d);
+  }
+}
+// seed
+addTopic("Cell structure & transport","Medium",3);
+addTopic("Genetics & inheritance","Hard",5);
+addTopic("Metabolism & enzymes","Hard",4);
+addTopic("Ecology & populations","Easy",2);
+buildDays();
+document.getElementById("startDate").value=iso(today);
+const ex=new Date(today);ex.setDate(ex.getDate()+28);
+document.getElementById("examDate").value=iso(ex);
+document.getElementById("goal").value="Ace BIO 201 final — target A";
+
+// ---------- the engine ----------
+function readInputs(){
+  const topics=[...document.querySelectorAll(".topic")].map(t=>({
+    name:t.querySelector(".t-name").value.trim()||"Untitled topic",
+    diff:t.querySelector(".t-diff").value,
+    hrs:parseFloat(t.querySelector(".t-hrs").value)||1
+  })).filter(t=>t.name);
+  const cap={}; // dow -> hours
+  document.querySelectorAll(".day").forEach(d=>{
+    if(d.classList.contains("on")){
+      const h=parseFloat(d.querySelector("input").value)||0;
+      if(h>0) cap[+d.dataset.dow]=h;
+    }
+  });
+  return {
+    goal:document.getElementById("goal").value.trim()||"My goal",
+    start:new Date(document.getElementById("startDate").value+"T00:00"),
+    exam:new Date(document.getElementById("examDate").value+"T00:00"),
+    topics, cap
+  };
+}
+
+// Effort-estimation correction: students underestimate, esp. on hard material.
+const FUDGE={Easy:1.15, Medium:1.4, Hard:1.7};
+const DIFF_W={Easy:1, Medium:1.5, Hard:2.2};
+// spaced-repetition intervals (days after first learning) — expanding schedule
+const SPACING=[2,5,11,21];
+
+function generate(){
+  const inp=readInputs();
+  if(!inp.topics.length){alert("Add at least one topic.");return;}
+  if(!(inp.exam>inp.start)){alert("Exam date must be after the start date.");return;}
+
+  // build list of available study days with capacity
+  const days=[];
+  for(let d=new Date(inp.start); d<inp.exam; d.setDate(d.getDate()+1)){
+    const dow=d.getDay();
+    if(inp.cap[dow]) days.push({date:new Date(d), dow, cap:inp.cap[dow], used:0, sessions:[]});
+  }
+  if(!days.length){alert("No study days available before the exam. Add capacity.");return;}
+
+  // PRIORITIZATION: difficulty-weighted corrected effort -> session budget
+  let topics=inp.topics.map((t,i)=>{
+    const corrected=t.hrs*FUDGE[t.diff];
+    return {...t, id:i, corrected, weight:DIFF_W[t.diff], firstLearn:null, reviews:0};
+  });
+  // order topics so hardest/heaviest get introduced first (more spacing runway)
+  topics.sort((a,b)=>b.weight-a.weight || b.corrected-a.corrected);
+
+  const dayIdx = d => days.findIndex(x=>iso(x.date)===iso(d));
+  const place=(di,sesh,mins)=>{
+    // find the day at/after di with room; else the one with least overflow
+    for(let k=di;k<days.length;k++){
+      if(days[k].used+mins<=days[k].cap*60+1){days[k].used+=mins;days[k].sessions.push(sesh);return days[k];}
+    }
+    // overflow: cram into last day
+    const last=days[days.length-1];last.used+=mins;last.sessions.push(sesh);return last;
+  };
+
+  // STRUCTURE + OUTPUT: schedule LEARN sessions early, chunked ~50min, interleaved
+  // distribute initial learning across first ~60% of timeline
+  const learnWindow=Math.max(1,Math.floor(days.length*0.6));
+  topics.forEach((t,i)=>{
+    const totalMin=Math.round(t.corrected*60);
+    const chunks=Math.max(1,Math.ceil(totalMin/50));
+    const chunkMin=Math.round(totalMin/chunks);
+    for(let c=0;c<chunks;c++){
+      // interleave: spread this topic's chunks, offset by topic index for variety
+      let di=Math.round((c/Math.max(1,chunks))*learnWindow + i)%Math.max(1,learnWindow);
+      di=Math.min(di,days.length-1);
+      const placed=place(di,{
+        type:"new", topic:t.name, diff:t.diff, mins:chunkMin,
+        action:`Learn — active read + make ${Math.max(3,Math.round(chunkMin/8))} retrieval questions on "${t.name}"`,
+        part:`${c+1}/${chunks}`
+      },chunkMin);
+      if(t.firstLearn===null) t.firstLearn=placed.date;
+    }
+  });
+
+  // INTELLIGENCE: spaced retrieval reviews after first learning
+  topics.forEach(t=>{
+    if(t.firstLearn===null) return;
+    SPACING.forEach((gap,r)=>{
+      const rd=new Date(t.firstLearn); rd.setDate(rd.getDate()+gap);
+      if(rd>=inp.exam) return;
+      let di=dayIdx(rd);
+      if(di<0){ // snap to next available study day
+        di=days.findIndex(x=>x.date>=rd);
+        if(di<0) return;
+      }
+      const mins=t.diff==="Hard"?30:t.diff==="Medium"?22:15;
+      place(di,{
+        type:"review", topic:t.name, diff:t.diff, mins,
+        action:`Retrieval practice (no notes) — recall key ideas from "${t.name}", then check`,
+        part:`review ${r+1}`
+      },mins);
+      t.reviews++;
+    });
+  });
+
+  // Final-stretch: mixed practice test on last 2-3 study days (interleaving + retrieval)
+  const stretch=days.slice(-Math.min(3,days.length));
+  stretch.forEach(d=>{
+    d.sessions.push({
+      type:"test", topic:"Mixed practice", diff:"—", mins:45,
+      action:"Full interleaved practice test across all topics — simulate exam conditions, then review errors",
+      part:"taper"
+    });
+    d.used+=45;
+  });
+
+  render(inp,days,topics);
+}
+
+function render(inp,days,topics){
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("plan").classList.remove("hidden");
+  window.scrollTo(0,0);
+
+  const totalMin=days.reduce((s,d)=>s+d.sessions.reduce((a,x)=>a+x.mins,0),0);
+  const nNew=days.reduce((s,d)=>s+d.sessions.filter(x=>x.type==="new").length,0);
+  const nRev=days.reduce((s,d)=>s+d.sessions.filter(x=>x.type==="review").length,0);
+  const daysToExam=Math.ceil((inp.exam-today)/(864e5));
+
+  let html=`
+  <div class="card"><h2>Prescription for: ${esc(inp.goal)}</h2>
+   <div style="font-size:13px;color:var(--mut)">Exam ${inp.exam.toDateString()} · ${daysToExam} days out · ${days.length} study days</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n">${(totalMin/60).toFixed(1)}h</div><div class="l">Total work</div></div>
+    <div class="stat"><div class="n">${nNew}</div><div class="l">Learn blocks</div></div>
+    <div class="stat"><div class="n">${nRev}</div><div class="l">Spaced reviews</div></div>
+    <div class="stat"><div class="n">${topics.length}</div><div class="l">Topics</div></div>
+  </div>
+  <div class="why">
+    <b>Why this plan looks like this.</b> Hard topics were introduced first to give them the longest
+    spaced-repetition runway. Your estimated hours were scaled up (hard ×1.7) to correct for chronic
+    under-estimation. Each topic comes back for <b>retrieval practice</b> at expanding intervals
+    (2 → 5 → 11 → 21 days) instead of re-reading. The final days are <b>interleaved mock exams</b>.
+    You don't have to decide what to do — just open today and do the blocks.
+  </div>`;
+
+  // group by week
+  let curWeek=-1;
+  days.forEach(d=>{
+    const wk=weekNum(inp.start,d.date);
+    if(wk!==curWeek){ html+=`<div class="wkhd">Week ${wk+1}</div>`; curWeek=wk; }
+    if(!d.sessions.length){ html+=`<div class="rest">Rest day — recovery matters</div>`; return; }
+    // sort sessions: new, review, test
+    const order={new:0,review:1,test:2,exam:3};
+    d.sessions.sort((a,b)=>order[a.type]-order[b.type]);
+    d.sessions.forEach((s,i)=>{
+      html+=`<div class="sesh" style="border-left-color:${barColor(s.type)}">
+        <div class="date">${i===0?`<div class="dow">${DOW[d.dow]}</div><div class="dnum">${d.date.getDate()}</div>`:""}</div>
+        <div class="body">
+          <div class="ttl">${esc(s.topic)} ${s.part?`<span style="color:var(--mut);font-weight:400;font-size:12px">· ${s.part}</span>`:""}</div>
+          <div class="meta">${esc(s.action)}</div>
+          <span class="chip ${chipClass(s.type)}">${label(s.type)}</span>
+          <span class="chip" style="background:var(--panel2);color:var(--mut)">${s.mins} min</span>
+          ${s.diff&&s.diff!=="—"?`<span class="chip" style="background:var(--panel2);color:var(--mut)">${s.diff}</span>`:""}
+        </div></div>`;
+    });
+  });
+  document.getElementById("planBody").innerHTML=html;
+}
+
+function weekNum(start,d){return Math.floor((d-startOfWeek(start))/(7*864e5));}
+function startOfWeek(d){const x=new Date(d);x.setDate(x.getDate()-x.getDay());x.setHours(0,0,0,0);return x;}
+function barColor(t){return {new:"#58a6ff",review:"#bc8cff",test:"#3fb950",exam:"#f85149"}[t]||"#58a6ff";}
+function chipClass(t){return {new:"c-new",review:"c-rev",test:"c-test",exam:"c-exam"}[t];}
+function label(t){return {new:"Learn",review:"Retrieval",test:"Mock exam",exam:"Exam"}[t];}
+function esc(s){return (s+"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function back(){document.getElementById("plan").classList.add("hidden");document.getElementById("setup").classList.remove("hidden");window.scrollTo(0,0);}
+</script>
+</body>
+</html>
